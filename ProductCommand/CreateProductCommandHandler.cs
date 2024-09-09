@@ -1,13 +1,11 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using CQRS_Microservice.ProductCommand;
 using CQRS_Microservice.Data;
-using CQRS_Microservice.Models; 
+using CQRS_Microservice.Models;
 using MediatR;
 
 public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand, Unit>
 {
+    // make the command and its handler in one class
+
     private readonly ApplicationDbContext _context;
 
     public CreateProductCommandHandler(ApplicationDbContext context)

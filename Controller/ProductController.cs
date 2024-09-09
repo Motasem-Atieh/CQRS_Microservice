@@ -11,6 +11,11 @@ using System.Threading.Tasks;
 
 namespace CQRS_Microservice.Controllers
 {
+    // create a const for all permissions
+    // create a common method for cache
+    // the cache removing and adding should be done inside the MediatR
+    // 
+
     [ApiController]
     [Route("api/[controller]")]
     public class ProductController : ControllerBase

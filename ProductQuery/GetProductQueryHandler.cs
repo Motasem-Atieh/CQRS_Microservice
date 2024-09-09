@@ -1,15 +1,14 @@
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
+using AutoMapper;
 using CQRS_Microservice.Data;
 using CQRS_Microservice.Dto;
-using AutoMapper;
-using MediatR;
 using CQRS_Microservice.Query;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace CQRS_Microservice.Handlers
 {
+    // make the query and its handler in one class
+
     public class GetProductQueryHandler : IRequestHandler<GetProductQuery, IEnumerable<ProductDto>>
     {
         private readonly ApplicationDbContext _context;

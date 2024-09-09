@@ -8,6 +8,9 @@ using CQRS_Microservice.Data;
 
 namespace CQRS_Microservice.Controllers
 {
+    // create a MediatR for GetUserById,CreateUser
+
+
     [ApiController]
     [Route("api/[controller]")]
     public class UserController : ControllerBase
@@ -38,7 +41,7 @@ namespace CQRS_Microservice.Controllers
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user);
+            return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, user); // ?
         }
 
         // GET: api/user/{id}

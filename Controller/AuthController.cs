@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Identity;
 
 namespace CQRS_Microservice.Controllers
 {
+    // separate UserLoginModel
+    // use primary constructor for AuthController
+
     [ApiController]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
