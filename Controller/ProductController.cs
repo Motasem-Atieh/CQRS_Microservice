@@ -1,139 +1,105 @@
+using AutoMapper;
 using CQRS_Microservice.Dto;
+using CQRS_Microservice.Helper;
 using CQRS_Microservice.Models;
 using CQRS_Microservice.ProductCommand;
-using CQRS_Microservice.Query;
-using MediatR;
+using CQRS_Microservice.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Distributed;
-using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace CQRS_Microservice.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class ProductController : ControllerBase
+    public class ProductController(
+            CacheService<ProductDto> _cacheService,
+            DatabaseService<Product> _databaseService,
+            IRabbitMQService _rabbitMQService,
+            IMapper _mapper,
+            ILogger<ProductController> _logger) : ControllerBase
     {
-        private readonly IMediator _mediator;
-        private readonly IDistributedCache _cache;
-        private readonly ILogger<ProductController> _logger;
-        private readonly IRabbitMQService _rabbitMQService;
-
-        public ProductController(IMediator mediator, IDistributedCache cache, ILogger<ProductController> logger, IRabbitMQService rabbitMQService)
-        {
-            _mediator = mediator;
-            _cache = cache;
-            _logger = logger;
-            _rabbitMQService = rabbitMQService;
-        }
-
-        // Get all products (cached)
-        [Authorize(Policy = "CanReadProduct")]
+       
+        [Authorize(Policy = PermissionHelper.CanReadProduct)]
         [HttpGet]
         public async Task<IActionResult> Get()
         {
             var cacheKey = "ProductList";
-            var cachedProducts = await _cache.GetStringAsync(cacheKey);
+            var cachedProducts = await _cacheService.GetCollectionFromCacheAsync(cacheKey);
 
-            if (!string.IsNullOrEmpty(cachedProducts))
+            if (cachedProducts == null) //if no products in cache
             {
-                var products = JsonSerializer.Deserialize<IEnumerable<ProductDto>>(cachedProducts);
-                _logger.LogInformation($"Getting products from cache with key: {cacheKey}");
-                return Ok(products);
+                var products = await _databaseService.GetAllAsync(); //get from db
+                var productsDto = _mapper.Map<IEnumerable<ProductDto>>(products); //map
+
+                // Cache the products
+                await _cacheService.SetCacheAsync(cacheKey, productsDto);
+                cachedProducts = productsDto;
             }
 
-            var productsFromDb = await _mediator.Send(new GetProductQuery());
-            var cacheOptions = new DistributedCacheEntryOptions()
-                .SetSlidingExpiration(TimeSpan.FromMinutes(10))
-                .SetAbsoluteExpiration(TimeSpan.FromHours(1));
-
-            await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(productsFromDb), cacheOptions);
-            _logger.LogInformation($"Getting products from cache with key: {cacheKey}");
-            return Ok(productsFromDb);
+            _logger.LogInformation($"Retrieved product list for cache key: {cacheKey}");
+            return Ok(cachedProducts);
         }
 
-
-        // Get a product by ID (cached)
-        [Authorize(Policy = "CanReadProduct")]
+        [Authorize(Policy = PermissionHelper.CanReadProduct)]
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
             var cacheKey = $"Product_{id}";
-            var cachedProduct = await _cache.GetStringAsync(cacheKey);
+            var cachedProduct = await _cacheService.GetFromCacheAsync(cacheKey); //get 1 product from cache
 
-            if (!string.IsNullOrEmpty(cachedProduct))
+            if (cachedProduct == null) //if not in cache
             {
-                var product = JsonSerializer.Deserialize<ProductDto>(cachedProduct);
-                return Ok(product);
+                var product = await _databaseService.GetByIdAsync(id); //get from db
+                if (product == null) //if not in db
+                    return NotFound();
+
+                //if in db but not in cache, add to cache
+
+                var productDto = _mapper.Map<ProductDto>(product); 
+                await _cacheService.SetCacheAsync(cacheKey, productDto);
+                cachedProduct = productDto;
             }
 
-            var productFromDb = await _mediator.Send(new GetProductByIdQuery(id));
-            if (productFromDb == null)
-                return NotFound();
-
-            var cacheOptions = new DistributedCacheEntryOptions()
-                .SetSlidingExpiration(TimeSpan.FromMinutes(10))
-                .SetAbsoluteExpiration(TimeSpan.FromHours(1));
-
-            await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(productFromDb), cacheOptions);
-            return Ok(productFromDb);
+            _logger.LogInformation($"Retrieved product for cache key: {cacheKey}");
+            return Ok(cachedProduct);
         }
 
-        // Create a new product
-        [Authorize(Policy = "CanCreateProduct")]
+        [Authorize(Policy = PermissionHelper.CanCreateProduct)]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateProductCommand command)
         {
-           
+            _rabbitMQService.SendingMessage(command); //send a create request to queue
 
-            _rabbitMQService.SendingMessage(command);
-
-            
-
+            _logger.LogInformation("Product creation command sent to RabbitMQ.");
             return Ok();
-            //###############
-
-
-            //var productId = await _mediator.Send(command);
-
-           
-            //await _cache.RemoveAsync("ProductList");
-
-           // return CreatedAtAction(nameof(Get), new { id = productId }, productId);
         }
 
-        // Update a product
-        [Authorize(Policy = "CanUpdateProduct")]
+        [Authorize(Policy = PermissionHelper.CanUpdateProduct)]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateProductCommand command)
         {
             if (id != command.Id)
                 return BadRequest("ID mismatch");
 
-            var result = await _mediator.Send(command);
-            if (!result)
-                return NotFound();
+            _rabbitMQService.SendingMessage(command); //send a update request to queue
 
-            await _cache.RemoveAsync("ProductList");
-            await _cache.RemoveAsync($"Product_{id}");
-
+            _logger.LogInformation($"Product update command sent to RabbitMQ for ID: {id}");
             return NoContent();
         }
 
-        // Delete a product
-        [Authorize(Policy = "CanDeleteProduct")]
+        [Authorize(Policy = PermissionHelper.CanDeleteProduct)]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var result = await _mediator.Send(new DeleteProductCommand { Id = id });
-            if (!result)
-                return NotFound();
+            var deleteCommand = new DeleteProductCommand { Id = id };
+            _rabbitMQService.SendingMessage(deleteCommand); //send a delete request to queue
 
-            await _cache.RemoveAsync("ProductList");
-            await _cache.RemoveAsync($"Product_{id}");
-
+            _logger.LogInformation($"Product delete command sent to RabbitMQ for ID: {id}");
             return NoContent();
         }
-    } 
+    }
 }
+

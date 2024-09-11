@@ -11,10 +11,11 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using CQRS_Microservice;
 using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
 using CQRS_Microservice.Models;
 using CQRS_Microservice.Helper;
-using System.Reflection.PortableExecutable;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
+using CQRS_Microservice.Messaging;
+using CQRS_Microservice.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Redis
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = builder.Configuration["Redis:Configuration"];
+    options.InstanceName = builder.Configuration["Redis:InstanceName"];
+});
 
 // Register MediatR services
 builder.Services.AddApplicationMediatR();
@@ -72,6 +79,13 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 // Register AutoMapper services
 builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
+
+// Register generic CacheService
+builder.Services.AddScoped(typeof(CacheService<>));
+builder.Services.AddScoped(typeof(DatabaseService<>));
+
+// Add RabbitMQ
+builder.Services.AddScoped<IRabbitMQService, RabbitMQService>();
 
 // Add controllers
 builder.Services.AddControllers();
