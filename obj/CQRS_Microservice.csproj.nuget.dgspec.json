@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\MotasemAtieh\\Documents\\task\\4\\CQRS_Microservice\\CQRS_Microservice.csproj": {}
+    "C:\\Users\\MotasemAtieh\\Source\\Repos\\CQRS_Microservice\\CQRS_Microservice\\CQRS_Microservice.csproj": {}
   },
   "projects": {
-    "C:\\Users\\MotasemAtieh\\Documents\\task\\4\\CQRS_Microservice\\CQRS_Microservice.csproj": {
+    "C:\\Users\\MotasemAtieh\\Source\\Repos\\CQRS_Microservice\\CQRS_Microservice\\CQRS_Microservice.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\MotasemAtieh\\Documents\\task\\4\\CQRS_Microservice\\CQRS_Microservice.csproj",
+        "projectUniqueName": "C:\\Users\\MotasemAtieh\\Source\\Repos\\CQRS_Microservice\\CQRS_Microservice\\CQRS_Microservice.csproj",
         "projectName": "CQRS_Microservice",
-        "projectPath": "C:\\Users\\MotasemAtieh\\Documents\\task\\4\\CQRS_Microservice\\CQRS_Microservice.csproj",
+        "projectPath": "C:\\Users\\MotasemAtieh\\Source\\Repos\\CQRS_Microservice\\CQRS_Microservice\\CQRS_Microservice.csproj",
         "packagesPath": "C:\\Users\\MotasemAtieh\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\MotasemAtieh\\Documents\\task\\4\\CQRS_Microservice\\obj\\",
+        "outputPath": "C:\\Users\\MotasemAtieh\\Source\\Repos\\CQRS_Microservice\\CQRS_Microservice\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\MotasemAtieh\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -52,7 +52,7 @@
             },
             "MediatR": {
               "target": "Package",
-              "version": "[12.4.0, )"
+              "version": "[12.0.0, )"
             },
             "MediatR.Extensions.Microsoft.DependencyInjection": {
               "target": "Package",
@@ -76,6 +76,18 @@
               "target": "Package",
               "version": "[8.0.8, )"
             },
+            "Microsoft.Extensions.Caching.StackExchangeRedis": {
+              "target": "Package",
+              "version": "[9.0.0-preview.7.24406.2, )"
+            },
+            "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": {
+              "target": "Package",
+              "version": "[1.21.0, )"
+            },
+            "Newtonsoft.Json": {
+              "target": "Package",
+              "version": "[13.0.3, )"
+            },
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
               "version": "[8.0.4, )"
@@ -83,6 +95,10 @@
             "Pomelo.EntityFrameworkCore.MySql": {
               "target": "Package",
               "version": "[8.0.2, )"
+            },
+            "RabbitMQ.Client": {
+              "target": "Package",
+              "version": "[6.8.1, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",

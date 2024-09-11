@@ -1,6 +1,6 @@
 using AutoMapper;
 using CQRS_Microservice.Dto;
-using CQRS_Microservice.Models;   // Namespace for your DTOs
+using CQRS_Microservice.Models;  
 
 namespace CQRS_Microservice.Mapping
 {

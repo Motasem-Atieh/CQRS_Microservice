@@ -9,18 +9,9 @@ namespace CQRS_Microservice.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    public class AuthController(TokenService _tokenService, ApplicationDbContext _context, IPasswordHasher<User> _passwordHasher) : ControllerBase
     {
-        private readonly TokenService _tokenService;
-        private readonly ApplicationDbContext _context;
-        private readonly IPasswordHasher<User> _passwordHasher;
 
-        public AuthController(TokenService tokenService, ApplicationDbContext context, IPasswordHasher<User> passwordHasher)
-        {
-            _tokenService = tokenService;
-            _context = context;
-            _passwordHasher = passwordHasher;
-        }
 
         [HttpPost("generate-token")]
         public async Task<IActionResult> GenerateToken([FromBody] UserLoginModel model)
@@ -42,10 +33,6 @@ namespace CQRS_Microservice.Controllers
             return Unauthorized("Invalid username or password.");
         }
     }
-
-    public class UserLoginModel
-    {
-        public string Username { get; set; }
-        public string Password { get; set; }
-    }
 }
+
+  

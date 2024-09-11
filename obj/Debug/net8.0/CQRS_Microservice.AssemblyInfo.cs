@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("44508365-7709-4c5e-886c-df2f1f744aff")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("CQRS_Microservice")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+72aaac90fdaf53a2843bd7bab5bde853bbceaa3a")]
 [assembly: System.Reflection.AssemblyProductAttribute("CQRS_Microservice")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CQRS_Microservice")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

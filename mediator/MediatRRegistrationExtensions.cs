@@ -1,4 +1,3 @@
-
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -7,10 +6,11 @@ public static class MediatRRegistrationExtensions
 {
     public static IServiceCollection AddApplicationMediatR(this IServiceCollection services)
     {
-        // Register all MediatR handlers from the current AppDomain assemblies
+        // Register MediatR services and handlers from a specific assembly
         services.AddMediatR(cfg =>
         {
-            cfg.RegisterServicesFromAssemblies(AppDomain.CurrentDomain.GetAssemblies());
+            // Specify the assembly where your MediatR handlers are located
+            cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
         });
 
         return services;
